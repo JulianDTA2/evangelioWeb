@@ -147,16 +147,9 @@ def eliminarPersona(id):
             Evaluacion.query.filter_by(catequizando_id=c.id)\
                             .delete(synchronize_session=False)
 
-            # c) cambios, excepciones, etc. (si los usas)
-            CambioParroquia.query.filter_by(catequizando_id=c.id)\
-                                 .delete(synchronize_session=False)
-            Excepcion.query.filter_by(catequizando_id=c.id)\
-                           .delete(synchronize_session=False)
-
             # por último el catequizando
             db.session.delete(c)
             
-        # ── 3) ya podemos borrar la persona ─────────────────────────
         db.session.delete(persona)
         db.session.commit()
         flash('Persona eliminada correctamente', 'success')
