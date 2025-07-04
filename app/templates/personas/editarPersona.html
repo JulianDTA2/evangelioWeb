@@ -33,11 +33,11 @@
 
   <label>Estado Civil:</label><br>
   <select name="estado_Civil">
-    <option value="Soltero" {% if persona.estadoCivil == 'Soltero' %}selected{% endif %}>Soltero</option>
-    <option value="Casado" {% if persona.estadoCivil == 'Casado' %}selected{% endif %}>Casado</option>
-    <option value="Divorciado" {% if persona.estadoCivil == 'Divorciado' %}selected{% endif %}>Divorciado</option>
-    <option value="Viudo" {% if persona.estadoCivil == 'Viudo' %}selected{% endif %}>Viudo</option>
-    <option value="Unión Libre" {% if persona.estadoCivil == 'Unión Libre' %}selected{% endif %}>Unión Libre</option>
+    <option value="Soltero" {% if persona.estado_Civil == 'Soltero' %}selected{% endif %}>Soltero</option>
+    <option value="Casado" {% if persona.estado_Civil == 'Casado' %}selected{% endif %}>Casado</option>
+    <option value="Divorciado" {% if persona.estado_Civil == 'Divorciado' %}selected{% endif %}>Divorciado</option>
+    <option value="Viudo" {% if persona.estado_Civil == 'Viudo' %}selected{% endif %}>Viudo</option>
+    <option value="Unión Libre" {% if persona.estado_Civil == 'Unión Libre' %}selected{% endif %}>Unión Libre</option>
   </select><br><br>
 
   <input type="submit" value="Actualizar">

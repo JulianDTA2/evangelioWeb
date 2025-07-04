@@ -1,6 +1,7 @@
 {% extends 'base.html' %} {% block content %}
-<h2>Certificados Emitidos</h2>
-<a href="{{ url_for('mainRoutes.generarCertificado') }}">Generar Certificado</a>
+
+<h2>Certificados emitidos</h2>
+<a href="{{ url_for('mainRoutes.generarCertificado') }}">Generar certificado</a>
 
 <table border="1">
   <thead>
@@ -8,8 +9,7 @@
       <th>ID</th>
       <th>Catequizando</th>
       <th>Nivel</th>
-      <th>Fecha Emisión</th>
-      <th>Observación</th>
+      <th>Fecha emisión</th>
     </tr>
   </thead>
   <tbody>
@@ -21,10 +21,10 @@
         cert.catequizando.persona.apellidos }}
       </td>
       <td>{{ cert.nivel.nombre }}</td>
-      <td>{{ cert.fechaEmision }}</td>
-      <td>{{ cert.observacion }}</td>
+      <td>{{ cert.fecha_emision }}</td>
     </tr>
     {% endfor %}
   </tbody>
 </table>
+
 {% endblock %}

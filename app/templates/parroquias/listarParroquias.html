@@ -1,6 +1,7 @@
 {% extends 'base.html' %} {% block content %}
-<h2>Listado de Parroquias</h2>
-<a href="{{ url_for('mainRoutes.crearParroquia') }}">Nueva Parroquia</a>
+
+<h2>Listado de parroquias</h2>
+<a href="{{ url_for('mainRoutes.crearParroquia') }}">Nueva parroquia</a>
 
 <table border="1">
   <thead>
@@ -10,8 +11,10 @@
       <th>Dirección</th>
       <th>Teléfono</th>
       <th>Principal</th>
+      <th>Acciones</th>
     </tr>
   </thead>
+
   <tbody>
     {% for par in parroquias %}
     <tr>
@@ -19,27 +22,25 @@
       <td>{{ par.nombre }}</td>
       <td>{{ par.direccion }}</td>
       <td>{{ par.telefono }}</td>
-      <td>{{ 'Sí' if par.esPrincipal else 'No' }}</td>
+      <td>{% if par.es_principal %}Sí{% else %}No{% endif %}</td>
+
       <td>
         <a href="{{ url_for('mainRoutes.editarParroquia', id=par.id) }}"
           >Editar</a
         >
         |
         <form
-          method="post"
+          method="POST"
           action="{{ url_for('mainRoutes.eliminarParroquia', id=par.id) }}"
           style="display: inline"
+          onsubmit="return confirm('¿Eliminar esta parroquia?');"
         >
-          <button
-            type="submit"
-            onclick="return confirm('¿Eliminar esta parroquia?')"
-          >
-            Eliminar
-          </button>
+          <button type="submit">Eliminar</button>
         </form>
       </td>
     </tr>
     {% endfor %}
   </tbody>
 </table>
+
 {% endblock %}

@@ -1,6 +1,7 @@
 {% extends 'base.html' %} {% block content %}
-<h2>Listado de Evaluaciones</h2>
-<a href="{{ url_for('mainRoutes.crearEvaluacion') }}">Nueva Evaluación</a>
+
+<h2>Listado de evaluaciones</h2>
+<a href="{{ url_for('mainRoutes.crearEvaluacion') }}">Nueva evaluación</a>
 
 <table border="1">
   <thead>
@@ -8,25 +9,41 @@
       <th>ID</th>
       <th>Catequizando</th>
       <th>Nivel</th>
+      <th>Nota</th>
       <th>Fecha</th>
-      <th>Puntaje</th>
+      <th>Aprobó</th>
       <th>Observaciones</th>
     </tr>
   </thead>
+
   <tbody>
-    {% for ev in evaluaciones %}
+    {% for e in evaluaciones %}
     <tr>
-      <td>{{ ev.id }}</td>
+      <td>{{ e.id }}</td>
+
+      <!-- Nombre completo del catequizando -->
       <td>
-        {{ ev.catequizando.persona.nombres }} {{
-        ev.catequizando.persona.apellidos }}
+        {{ e.catequizando.persona.nombres }} {{ e.catequizando.persona.apellidos
+        }}
       </td>
-      <td>{{ ev.nivel.nombre }}</td>
-      <td>{{ ev.fecha }}</td>
-      <td>{{ ev.nota}}</td>
-      <td>{{ ev.observaciones }}</td>
+
+      <!-- Nivel al que pertenece la evaluación -->
+      <td>{{ e.nivel.nombre }}</td>
+
+      <!-- Nota / puntaje -->
+      <td>{{ e.nota }}</td>
+
+      <!-- Fecha de la evaluación -->
+      <td>{{ e.fecha }}</td>
+
+      <!-- Columna aprobado: Sí / No -->
+      <td>{% if e.aprobado %}Sí{% else %}No{% endif %}</td>
+
+      <!-- Observaciones (si existieran) -->
+      <td>{{ e.observaciones or '—' }}</td>
     </tr>
     {% endfor %}
   </tbody>
 </table>
+
 {% endblock %}

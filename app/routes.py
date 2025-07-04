@@ -1,12 +1,86 @@
 # app/routes.py
-from flask import Blueprint, render_template, request, redirect, url_for
-from app.models import db, Persona, Evaluacion, Asistencia, Certificado
+from flask import Blueprint, render_template, request, redirect, url_for, flash
+from app.models import db, Persona, Evaluacion, Asistencia, Certificado, Grupo, Nivel, Catequizando, Catequista
+from sqlalchemy.sql import func
+from datetime import date    
 
 mainRoutes = Blueprint('mainRoutes', __name__)
 
 @mainRoutes.route('/')
 def home():
     return render_template('home.html')
+
+@mainRoutes.route('/niveles')
+def listarNiveles():
+    niveles = Nivel.query.order_by(Nivel.id).all()
+    return render_template('niveles/listarNiveles.html', niveles=niveles)
+
+
+@mainRoutes.route('/niveles/nuevo', methods=['GET', 'POST'])
+def crearNivel():
+    if request.method == 'POST':
+        nuevo = Nivel(
+            nombre           = request.form['nombre'],
+            descripcion      = request.form.get('descripcion'),
+            duracion_semanas = request.form['duracion_semanas'],
+            edad_minima      = request.form.get('edad_minima') or None,
+            edad_maxima      = request.form.get('edad_maxima') or None,
+            requisitos       = request.form.get('requisitos')
+        )
+        db.session.add(nuevo)
+        db.session.commit()
+        return redirect(url_for('mainRoutes.listarNiveles'))
+
+    return render_template('niveles/crearNivel.html')
+
+
+@mainRoutes.route('/niveles/editar/<int:id>', methods=['GET', 'POST'])
+def editarNivel(id):
+    nivel = Nivel.query.get_or_404(id)
+    if request.method == 'POST':
+        nivel.nombre           = request.form['nombre']
+        nivel.descripcion      = request.form.get('descripcion')
+        nivel.duracion_semanas = request.form['duracion_semanas']
+        nivel.edad_minima      = request.form.get('edad_minima') or None
+        nivel.edad_maxima      = request.form.get('edad_maxima') or None
+        nivel.requisitos       = request.form.get('requisitos')
+        db.session.commit()
+        return redirect(url_for('mainRoutes.listarNiveles'))
+
+    return render_template('niveles/editarNivel.html', nivel=nivel)
+
+
+from sqlalchemy.exc import IntegrityError
+
+@mainRoutes.route('/niveles/eliminar/<int:id>', methods=['POST'])
+def eliminarNivel(id):
+    nivel = Nivel.query.get_or_404(id)
+
+    try:
+        # 1) eliminar certificados que referencian este nivel
+        Certificado.query.filter_by(nivel_id=id).delete(synchronize_session=False)
+
+        # 2) eliminar evaluaciones que referencian este nivel
+        Evaluacion.query.filter_by(nivel_id=id).delete(synchronize_session=False)
+
+        # 3) (si usas Grupos ligados al nivel)
+        Grupo.query.filter_by(nivel_id=id).delete(synchronize_session=False)
+
+        # 4) poner a NULL el nivel_actual de los catequizandos
+        Catequizando.query.filter_by(nivel_Actual=id)\
+            .update({Catequizando.nivel_Actual: None},
+                    synchronize_session=False)
+
+        # 5) ahora sí, borrar el nivel
+        db.session.delete(nivel)
+        db.session.commit()
+        flash('Nivel eliminado correctamente', 'success')
+
+    except IntegrityError as e:          # cualquier FK pendiente
+        db.session.rollback()
+        flash(f'No se pudo eliminar: {e.orig}', 'danger')
+
+    return redirect(url_for('mainRoutes.listarNiveles'))
 
 
 @mainRoutes.route('/personas')
@@ -58,9 +132,41 @@ def editarPersona(id):
 @mainRoutes.route('/personas/eliminar/<int:id>', methods=['POST'])
 def eliminarPersona(id):
     persona = Persona.query.get_or_404(id)
-    db.session.delete(persona)
-    db.session.commit()
+
+    try:
+        # ── 1) catequizandos vinculados a la persona ─────────────────
+        for c in Catequizando.query.filter_by(persona_Id=id).all():
+
+            # a) asistencias → grupos                              
+            Asistencia.query.filter_by(catequizando_id=c.id)\
+                            .delete(synchronize_session=False)
+
+            # b) evaluaciones → certificados (los certificados cuelgan del nivel)     
+            Certificado.query.filter_by(catequizando_id=c.id)\
+                             .delete(synchronize_session=False)
+            Evaluacion.query.filter_by(catequizando_id=c.id)\
+                            .delete(synchronize_session=False)
+
+            # c) cambios, excepciones, etc. (si los usas)
+            CambioParroquia.query.filter_by(catequizando_id=c.id)\
+                                 .delete(synchronize_session=False)
+            Excepcion.query.filter_by(catequizando_id=c.id)\
+                           .delete(synchronize_session=False)
+
+            # por último el catequizando
+            db.session.delete(c)
+            
+        # ── 3) ya podemos borrar la persona ─────────────────────────
+        db.session.delete(persona)
+        db.session.commit()
+        flash('Persona eliminada correctamente', 'success')
+
+    except IntegrityError as e:
+        db.session.rollback()
+        flash(f'No se pudo eliminar: {e.orig}', 'danger')
+
     return redirect(url_for('mainRoutes.listarPersonas'))
+
 
 
 from app.models import Catequizando, Parroquia, Nivel
@@ -98,28 +204,35 @@ def crearCatequizando():
 @mainRoutes.route('/catequizandos/editar/<int:id>', methods=['GET', 'POST'])
 def editarCatequizando(id):
     catequizando = Catequizando.query.get_or_404(id)
-    personas = Persona.query.all()
-    parroquias = Parroquia.query.all()
-    niveles = Nivel.query.all()
 
     if request.method == 'POST':
-        catequizando.persona_Id = request.form['persona_Id']
-        catequizando.parroquia_Id = request.form['parroquia_Id']
-        catequizando.nivel_Actual = request.form.get('nivel_Actual') or None
+        # campos siempre presentes
+        catequizando.persona_Id    = request.form['persona_Id']
+        catequizando.parroquia_Id  = request.form['parroquia_Id']
+        catequizando.nivel_Actual  = request.form.get('nivel_Actual') or None
         catequizando.fecha_Ingreso = request.form['fecha_Ingreso']
-        catequizando.fecha_Salida = request.form.get('fecha_Salida')
-        catequizando.motivo_Salida = request.form.get('motivo_Salida')
-        catequizando.estado = request.form['estado']
+
+        # convertir vacíos a None
+        fecha_salida = request.form.get('fecha_Salida') or None
+        motivo       = request.form.get('motivo_Salida') or None
+
+        catequizando.fecha_Salida  = fecha_salida
+        catequizando.motivo_Salida = motivo
+        catequizando.estado        = request.form['estado']
+
         db.session.commit()
         return redirect(url_for('mainRoutes.listarCatequizandos'))
 
-    return render_template(
-        'catequizandos/editarCatequizando.html',
-        catequizando=catequizando,
-        personas=personas,
-        parroquias=parroquias,
-        niveles=niveles
-    )
+    # GET → renderizar formulario
+    personas   = Persona.query.all()
+    parroquias = Parroquia.query.all()
+    niveles    = Nivel.query.all()
+    return render_template('catequizandos/editarCatequizando.html',
+                           catequizando=catequizando,
+                           personas=personas,
+                           parroquias=parroquias,
+                           niveles=niveles)
+
 
 
 @mainRoutes.route('/catequizandos/eliminar/<int:id>', methods=['POST'])
@@ -144,7 +257,7 @@ def crearParroquia():
             nombre=request.form['nombre'],
             direccion=request.form['direccion'],
             telefono=request.form.get('telefono'),
-            es_Principal=True if request.form.get('es_Principal') == 'on' else False,
+            es_principal=True if request.form.get('es_principal') == 'on' else False,
             fecha_Fundacion=request.form.get('fecha_Fundacion'),
             historia=request.form.get('historia'),
             horarios_Atencion=request.form.get('horarios_Atencion'),
@@ -164,7 +277,7 @@ def editarParroquia(id):
         parroquia.nombre = request.form['nombre']
         parroquia.direccion = request.form['direccion']
         parroquia.telefono = request.form.get('telefono')
-        parroquia.es_Principal = True if request.form.get('es_Principal') == 'on' else False
+        parroquia.es_principal = True if request.form.get('es_principal') == 'on' else False
         parroquia.fecha_Fundacion = request.form.get('fecha_Fundacion')
         parroquia.historia = request.form.get('historia')
         parroquia.horarios_Atencion = request.form.get('horarios_Atencion')
@@ -190,25 +303,65 @@ def listarEvaluaciones():
     evaluaciones = Evaluacion.query.all()
     return render_template('evaluaciones/listarEvaluaciones.html', evaluaciones=evaluaciones)
 
-
-@mainRoutes.route('/evaluaciones/nueva', methods=['GET', 'POST'])
+@mainRoutes.route('/crear-evaluacion', methods=['GET', 'POST'])
 def crearEvaluacion():
-    catequizandos = Catequizando.query.all()
-    niveles = Nivel.query.all()
+    from datetime import date
 
     if request.method == 'POST':
-        nuevaEvaluacion = Evaluacion(
-            catequizando_id=request.form['catequizando_id'],
-            nivel_id=request.form['nivel_id'],
-            fecha=request.form['fecha'],
-            nota=request.form['nota'],
-            observaciones=request.form.get('observaciones')
-        )
-        db.session.add(nuevaEvaluacion)
-        db.session.commit()
-        return redirect(url_for('mainRoutes.listarEvaluaciones'))
+        try:
+            catequizando_id = request.form['catequizando_id']
+            nivel_id        = request.form['nivel_id']
 
-    return render_template('evaluaciones/crearEvaluacion.html', catequizandos=catequizandos, niveles=niveles)
+            # ---------- validación de NOTA ----------
+            nota_str = request.form['nota']
+            if not nota_str or not nota_str.isdigit():
+                flash('La nota debe ser un número entre 0 y 10')
+                return redirect(url_for('mainRoutes.crearEvaluacion'))
+            nota = int(nota_str)
+            if nota < 0 or nota > 10:
+                flash('La nota debe estar entre 0 y 10')
+                return redirect(url_for('mainRoutes.crearEvaluacion'))
+
+            # ---------- validación de FECHA ----------
+            fecha_str = request.form['fecha']
+            if not fecha_str:
+                flash('La fecha es obligatoria')
+                return redirect(url_for('mainRoutes.crearEvaluacion'))
+            fecha = date.fromisoformat(fecha_str)
+            if fecha > date.today():
+                flash('La fecha no puede ser futura')
+                return redirect(url_for('mainRoutes.crearEvaluacion'))
+
+            observaciones = request.form.get('observaciones', '')
+
+            aprobado = nota >= 7   #  o la regla que uses
+
+            nueva_eval = Evaluacion(
+                catequizando_id=catequizando_id,
+                nivel_id       =nivel_id,
+                nota           =nota,
+                fecha          =fecha,
+                aprobado       =aprobado,
+                observaciones  =observaciones
+            )
+
+            db.session.add(nueva_eval)
+            db.session.commit()
+            flash('Evaluación guardada correctamente')
+            return redirect(url_for('mainRoutes.listarEvaluaciones'))
+
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Ocurrió un error al guardar la evaluación: {e}')
+            return redirect(url_for('mainRoutes.crearEvaluacion'))
+
+    # GET
+    catequizandos = Catequizando.query.all()
+    niveles       = Nivel.query.all()
+    return render_template('evaluaciones/crearEvaluacion.html',
+                           catequizandos=catequizandos,
+                           niveles=niveles)
+
 
 from app.models import Asistencia
 
@@ -217,22 +370,77 @@ def listarAsistencias():
     asistencias = Asistencia.query.order_by(Asistencia.fecha.desc()).all()
     return render_template('asistencias/listarAsistencias.html', asistencias=asistencias)
 
+def _get_dummy_catequista() -> "Catequista":
+    dummy_cedula = "9999999999"
+
+    per = (
+        Persona.query.filter_by(cedula=dummy_cedula).first()
+        or Persona(
+            nombres="(Dummy)",
+            apellidos="(Catequista)",
+            cedula=dummy_cedula,
+            fecha_Nacimiento=date(1990, 1, 1),
+            activo=0,
+        )
+    )
+
+    cat = (
+        Catequista.query.filter_by(persona_id=per.id).first()
+        if per.id
+        else None
+    )
+
+    if not per.id:
+        db.session.add(per)
+        db.session.flush()  # ya tenemos per.id
+
+    if not cat:
+        cat = Catequista(persona_id=per.id, parroquia_id=1, fecha_inicio=date.today())
+        db.session.add(cat)
+        db.session.flush()
+
+    return cat
 
 @mainRoutes.route('/asistencias/nueva', methods=['GET', 'POST'])
 def registrarAsistencia():
-    catequizandos = Catequizando.query.all()
+    niveles = Nivel.query.order_by(Nivel.nombre).all()
+    catequizandos = Catequizando.query.order_by(Catequizando.id).all()
 
     if request.method == 'POST':
-        nuevaAsistencia = Asistencia(
-            catequizando_id=request.form['catequizando_id'],
-            fecha=request.form['fecha'],
-            estado=True if request.form.get('estado') == 'on' else False
+        nivel_id = request.form['nivel_id']
+        catequizando_id = request.form['catequizando_id']
+        estado = request.form['estado']                 # P  A  J
+        fecha = request.form.get('fecha') or date.today()
+        observaciones = request.form.get('observaciones')
+
+        grupo = Grupo.query.filter_by(nivel_id=nivel_id).first()
+        if not grupo:
+            flash('No existe grupo registrado para ese nivel')
+            return redirect(url_for('mainRoutes.registrarAsistencia'))
+
+        cateq = Catequizando.query.get(catequizando_id)
+        if not cateq or str(cateq.nivel_Actual) != str(nivel_id):
+            flash('El catequizando no pertenece a ese nivel')
+            return redirect(url_for('mainRoutes.registrarAsistencia'))
+
+        asistencia = Asistencia(
+            grupo_id=grupo.id,
+            catequizando_id=catequizando_id,
+            fecha=fecha,
+            estado=estado,
+            observaciones=observaciones,
+            registrado_por=None
         )
-        db.session.add(nuevaAsistencia)
+        db.session.add(asistencia)
         db.session.commit()
+        flash('Asistencia registrada correctamente')
         return redirect(url_for('mainRoutes.listarAsistencias'))
 
-    return render_template('asistencias/registrarAsistencia.html', catequizandos=catequizandos)
+    return render_template(
+        'asistencias/registrarAsistencia.html',
+        niveles=niveles,
+        catequizandos=catequizandos
+    )
 
 from datetime import date
 from sqlalchemy import and_
@@ -242,70 +450,93 @@ def listarCertificados():
     certificados = Certificado.query.all()
     return render_template('certificados/listarCertificados.html', certificados=certificados)
 
-
 @mainRoutes.route('/certificados/generar', methods=['GET', 'POST'])
 def generarCertificado():
     catequizandos = Catequizando.query.all()
-    niveles = Nivel.query.all()
+    niveles       = Nivel.query.all()
 
     if request.method == 'POST':
         catequizando_id = request.form['catequizando_id']
-        nivel_id = request.form['nivel_id']
+        nivel_id        = request.form['nivel_id']
 
-        evaluacion = Evaluacion.query.filter_by(
+        # ― buscar la evaluación aprobada (nota >= 7, ajusta si tu regla difiere)
+        evaluacion = (Evaluacion.query
+                      .filter_by(catequizando_id=catequizando_id,
+                                 nivel_id=nivel_id,
+                                 aprobado=True)
+                      .order_by(Evaluacion.nota.desc())
+                      .first())
+
+        if not evaluacion:
+            flash('El catequizando no tiene evaluación aprobada para este nivel.')
+            return redirect(url_for('mainRoutes.generarCertificado'))
+
+        # ― comprobar si YA existe un certificado para evitar duplicados
+        existe = Certificado.query.filter_by(
             catequizando_id=catequizando_id,
             nivel_id=nivel_id
-        ).order_by(Evaluacion.nota.desc()).first()
-
-        if evaluacion and evaluacion.nota >= 70:
-            nuevoCertificado = Certificado(
-                catequizando_id=catequizando_id,
-                nivel_id=nivel_id,
-                fecha_Emision=date.today(),
-                observacion='Aprobado con éxito'
-            )
-            db.session.add(nuevoCertificado)
-            db.session.commit()
+        ).first()
+        if existe:
+            flash('Ya existe un certificado para este nivel.')
             return redirect(url_for('mainRoutes.listarCertificados'))
-        else:
-            return "El catequizando no tiene evaluación aprobada para este nivel."
 
-    return render_template('certificados/generarCertificado.html', catequizandos=catequizandos, niveles=niveles)
+        nuevoCertificado = Certificado(
+            catequizando_id = catequizando_id,
+            nivel_id        = nivel_id,
+            fecha_Emision   = evaluacion.fecha,   # ← misma fecha de la evaluación aprobada
+            observacion     = None                # ← ya no usaremos observación
+        )
 
-from sqlalchemy.sql import func
+        db.session.add(nuevoCertificado)
+        db.session.commit()
+        flash('Certificado emitido correctamente')
+        return redirect(url_for('mainRoutes.listarCertificados'))
+
+    # GET
+    return render_template('certificados/generarCertificado.html',
+                           catequizandos=catequizandos,
+                           niveles=niveles)
+from sqlalchemy import func
 
 @mainRoutes.route('/reportes')
 def reportesGenerales():
-    total_Catequizandos = db.session.query(func.count(Catequizando.id)).scalar()
+    total_catequizandos = db.session.query(func.count(Catequizando.id)).scalar()
 
-    catequizandosPorNivel = db.session.query(
-        Nivel.nombre,
-        func.count(Catequizando.id)
-    ).join(Catequizando, Catequizando.nivelActual == Nivel.id)\
-     .group_by(Nivel.nombre).all()
+    # catequizandos por nivel -------------------------
+    catequizandosPorNivel = (
+        db.session.query(
+            Nivel.nombre,
+            func.count(Catequizando.id)
+        )
+        .outerjoin(Catequizando, Catequizando.nivel_Actual == Nivel.id)
+        .group_by(Nivel.nombre)
+        .all()
+    )
 
-    promedio_Evaluaciones = db.session.query(
-        func.avg(Evaluacion.nota)
-    ).scalar()
+    # promedio de notas -------------------------------
+    promedio_Evaluaciones = db.session.query(func.avg(Evaluacion.nota)).scalar() or 0
 
+    # certificados emitidos ---------------------------
     certificados_Emitidos = db.session.query(func.count(Certificado.id)).scalar()
 
-    asistencias = db.session.query(func.count(Asistencia.id)).scalar()
-    asistenciasSi = db.session.query(func.count(Asistencia.id))\
-        .filter(Asistencia.estado == True).scalar()
-    porcentaje_Asistencia = (asistenciasSi / asistencias * 100) if asistencias else 0
+    # asistencias -------------------------------------
+    total_asistencias = db.session.query(func.count(Asistencia.id)).scalar()
+
+    presentes = (
+        db.session.query(func.count(Asistencia.id))
+        .filter(Asistencia.estado == 'P')      # ← aquí va 'P'
+        .scalar()
+    )
+
+    porcentaje_asistencia = (
+        (presentes / total_asistencias * 100) if total_asistencias else 0
+    )
 
     return render_template(
         'reportes/reportesGenerales.html',
-        total_Catequizandos=total_Catequizandos,
-        catequizandosPorNivel=catequizandosPorNivel,
-        promedio_Evaluaciones=round(promedio_Evaluaciones, 2) if promedio_Evaluaciones else 0,
-        certificados_Emitidos=certificados_Emitidos,
-        porcentaje_Asistencia=round(porcentaje_Asistencia, 2)
+        total_Catequizandos = total_catequizandos,
+        catequizandosPorNivel = catequizandosPorNivel,
+        promedio_Evaluaciones = round(promedio_Evaluaciones, 2),
+        certificados_Emitidos = certificados_Emitidos,
+        porcentaje_Asistencia = round(porcentaje_asistencia, 2)
     )
-
-
-
-
-
-

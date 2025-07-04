@@ -1,33 +1,49 @@
 {% extends 'base.html' %} {% block content %}
-<h2>Registrar Nueva Parroquia</h2>
-<form method="post">
+
+<h2>Registrar nueva parroquia</h2>
+
+<form method="POST" action="{{ url_for('mainRoutes.crearParroquia') }}">
   <label>Nombre:</label><br />
-  <input type="text" name="nombre" /><br />
+  <input type="text" name="nombre" required /><br />
 
   <label>Dirección:</label><br />
-  <input type="text" name="direccion" /><br />
+  <input type="text" name="direccion" required /><br />
 
   <label>Teléfono:</label><br />
   <input type="text" name="telefono" /><br />
 
-  <label>¿Es parroquia principal?</label>
-  <input type="checkbox" name="es_Principal" /><br />
+  <label>
+    <input
+      type="checkbox"
+      name="es_principal"
+      {%
+      if
+      parroquia
+      and
+      parroquia.es_principal
+      %}checked{%
+      endif
+      %}
+    />
+    ¿Es parroquia principal? </label
+  ><br />
 
-  <label>Fecha de Fundación:</label><br />
+  <label>Fecha de fundación:</label><br />
   <input type="date" name="fecha_Fundacion" /><br />
 
   <label>Historia:</label><br />
   <textarea name="historia"></textarea><br />
 
-  <label>Horarios de Atención:</label><br />
+  <label>Horarios de atención:</label><br />
   <input type="text" name="horarios_Atencion" /><br />
 
-  <label>Sitio Web:</label><br />
+  <label>Sitio web:</label><br />
   <input type="text" name="sitio_Web" /><br />
 
   <label>Email:</label><br />
   <input type="email" name="email" /><br /><br />
 
-  <input type="submit" value="Guardar" />
+  <button type="submit">Guardar</button>
 </form>
+
 {% endblock %}

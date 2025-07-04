@@ -1,22 +1,25 @@
 {% extends 'base.html' %} {% block content %}
-<h2>Generar Certificado</h2>
-<form method="post">
-  <label>Catequizando:</label><br />
-  <select name="catequizando_id">
+
+<h2>Generar certificado</h2>
+
+<form method="POST" action="{{ url_for('mainRoutes.generarCertificado') }}">
+  <label for="catequizando">Catequizando:</label><br />
+  <select name="catequizando_id" id="catequizando" required>
     {% for c in catequizandos %}
     <option value="{{ c.id }}">
       {{ c.persona.nombres }} {{ c.persona.apellidos }}
     </option>
     {% endfor %}</select
-  ><br />
+  ><br /><br />
 
-  <label>Nivel:</label><br />
-  <select name="nivel_id">
+  <label for="nivel">Nivel:</label><br />
+  <select name="nivel_id" id="nivel" required>
     {% for n in niveles %}
     <option value="{{ n.id }}">{{ n.nombre }}</option>
     {% endfor %}</select
   ><br /><br />
 
-  <input type="submit" value="Emitir Certificado" />
+  <button type="submit">Emitir certificado</button>
 </form>
+
 {% endblock %}

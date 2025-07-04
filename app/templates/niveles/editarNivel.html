@@ -1,0 +1,41 @@
+{% extends 'base.html' %} {% block content %}
+
+<h2>Editar nivel</h2>
+<form method="POST">
+  <label>Nombre:</label><br />
+  <input type="text" name="nombre" value="{{ nivel.nombre }}" required /><br />
+
+  <label>Descripción:</label><br />
+  <textarea name="descripcion">{{ nivel.descripcion }}</textarea><br />
+
+  <label>Duración en semanas:</label><br />
+  <input
+    type="number"
+    name="duracion_semanas"
+    value="{{ nivel.duracion_semanas }}"
+    min="1"
+    required
+  /><br />
+
+  <label>Edad mínima:</label>
+  <input
+    type="number"
+    name="edad_minima"
+    value="{{ nivel.edad_minima or '' }}"
+    min="0"
+  />
+  <label>Edad máxima:</label>
+  <input
+    type="number"
+    name="edad_maxima"
+    value="{{ nivel.edad_maxima or '' }}"
+    min="0"
+  /><br />
+
+  <label>Requisitos:</label><br />
+  <textarea name="requisitos">{{ nivel.requisitos }}</textarea><br /><br />
+
+  <button type="submit">Actualizar</button>
+</form>
+
+{% endblock %}

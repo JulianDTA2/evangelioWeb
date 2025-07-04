@@ -28,8 +28,9 @@
   <label>Fecha Ingreso:</label><br>
   <input type="date" name="fecha_Ingreso" value="{{ catequizando.fecha_Ingreso }}"><br>
 
-  <label>Fecha Salida:</label><br>
-  <input type="date" name="fecha_Salida" value="{{ catequizando.fecha_Salida }}"><br>
+  <label>Fecha de salida (opcional):</label><br>
+  <input type="date" name="fecha_Salida"
+       value="{{ catequizando.fecha_Salida or '' }}"><br>
 
   <label>Motivo Salida:</label><br>
   <input type="text" name="motivo_Salida" value="{{ catequizando.motivo_Salida }}"><br>

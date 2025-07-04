@@ -1,7 +1,7 @@
 {% extends 'base.html' %} {% block content %}
-<h2>Historial de Asistencias</h2>
+<h2>Historial de asistencias</h2>
 <a href="{{ url_for('mainRoutes.registrarAsistencia') }}"
-  >Registrar Asistencia</a
+  >Registrar asistencia</a
 >
 
 <table border="1">
@@ -9,6 +9,8 @@
     <tr>
       <th>ID</th>
       <th>Catequizando</th>
+      <th>Nivel</th>
+      <!-- ← nuevo -->
       <th>Fecha</th>
       <th>Asistió</th>
     </tr>
@@ -21,6 +23,8 @@
         {{ a.catequizando.persona.nombres }} {{ a.catequizando.persona.apellidos
         }}
       </td>
+      <td>{{ a.grupo.nivel.nombre }}</td>
+      <!-- usamos relación grupo→nivel -->
       <td>{{ a.fecha }}</td>
       <td>{{ 'Sí' if a.estado else 'No' }}</td>
     </tr>

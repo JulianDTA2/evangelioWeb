@@ -1,49 +1,67 @@
 {% extends 'base.html' %} {% block content %}
-<h2>Editar Parroquia</h2>
-<form method="post">
+
+<h2>Editar parroquia</h2>
+
+<form method="POST">
   <label>Nombre:</label><br />
-  <input type="text" name="nombre" value="{{ parroquia.nombre }}" /><br />
+  <input
+    type="text"
+    name="nombre"
+    value="{{ parroquia.nombre }}"
+    required
+  /><br />
 
   <label>Dirección:</label><br />
-  <input type="text" name="direccion" value="{{ parroquia.direccion }}" /><br />
+  <input
+    type="text"
+    name="direccion"
+    value="{{ parroquia.direccion }}"
+    required
+  /><br />
 
   <label>Teléfono:</label><br />
   <input type="text" name="telefono" value="{{ parroquia.telefono }}" /><br />
 
-  <label>¿Es parroquia principal?</label>
-  <input
-    type="checkbox"
-    name="esPrincipal"
-    {%
-    if
-    parroquia.es_Principal
-    %}checked{%
-    endif%}
-  /><br />
+  <label>
+    <input
+      type="checkbox"
+      name="es_principal"
+      {%
+      if
+      parroquia
+      and
+      parroquia.es_principal
+      %}checked{%
+      endif
+      %}
+    />
+    ¿Es parroquia principal? </label
+  ><br />
 
-  <label>Fecha de Fundación:</label><br />
+  <label>Fecha de fundación:</label><br />
   <input
     type="date"
-    name="fechaFundacion"
+    name="fecha_Fundacion"
     value="{{ parroquia.fecha_Fundacion }}"
   /><br />
 
   <label>Historia:</label><br />
   <textarea name="historia">{{ parroquia.historia }}</textarea><br />
 
-  <label>Horarios de Atención:</label><br />
+  <label>Horarios de atención:</label><br />
   <input
     type="text"
-    name="horariosAtencion"
+    name="horarios_Atencion"
     value="{{ parroquia.horarios_Atencion }}"
   /><br />
 
-  <label>Sitio Web:</label><br />
-  <input type="text" name="sitioWeb" value="{{ parroquia.sitio_Web }}" /><br />
+  <label>Sitio web:</label><br />
+  <input type="text" name="sitio_Web" value="{{ parroquia.sitio_Web }}" /><br />
 
   <label>Email:</label><br />
   <input type="email" name="email" value="{{ parroquia.email }}" /><br /><br />
 
-  <input type="submit" value="Actualizar" />
+  <button type="submit">Actualizar</button>
 </form>
+
 {% endblock %}

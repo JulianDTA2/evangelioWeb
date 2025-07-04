@@ -10,6 +10,7 @@
       <h1>Evangelio Web</h1>
       <nav>
         <a href="{{ url_for('mainRoutes.home') }}">Inicio</a> |
+        <a href="{{ url_for('mainRoutes.listarNiveles') }}">Niveles</a> |
         <a href="{{ url_for('mainRoutes.listarPersonas') }}">Personas</a> |
         <a href="{{ url_for('mainRoutes.listarCatequizandos') }}"
           >Catequizandos</a
@@ -30,7 +31,13 @@
       </nav>
       <hr />
     </header>
-
+    {% with messages = get_flashed_messages() %} {% if messages %}
+    <ul class="flashes">
+      {% for message in messages %}
+      <li>{{ message }}</li>
+      {% endfor %}
+    </ul>
+    {% endif %} {% endwith %}
     <main>{% block content %}{% endblock %}</main>
   </body>
 </html>

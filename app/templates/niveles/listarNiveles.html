@@ -1,0 +1,42 @@
+{% extends 'base.html' %} {% block content %}
+
+<h2>Niveles catequéticos</h2>
+<a href="{{ url_for('mainRoutes.crearNivel') }}">Nuevo nivel</a>
+
+<table border="1">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Nombre</th>
+      <th>Duración (sem)</th>
+      <th>Edades</th>
+      <th>Acciones</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for n in niveles %}
+    <tr>
+      <td>{{ n.id }}</td>
+      <td>{{ n.nombre }}</td>
+      <td>{{ n.duracion_semanas }}</td>
+      <td>
+        {% if n.edad_minima %}{{ n.edad_minima }}-{{ n.edad_maxima }} años {%
+        else %} — {% endif %}
+      </td>
+      <td>
+        <a href="{{ url_for('mainRoutes.editarNivel', id=n.id) }}">Editar</a> |
+        <form
+          method="POST"
+          action="{{ url_for('mainRoutes.eliminarNivel', id=n.id) }}"
+          style="display: inline"
+          onsubmit="return confirm('¿Eliminar nivel?');"
+        >
+          <button type="submit">Eliminar</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% endblock %}

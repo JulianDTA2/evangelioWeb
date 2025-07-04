@@ -1,0 +1,25 @@
+{% extends 'base.html' %} {% block content %}
+
+<h2>Nuevo nivel</h2>
+<form method="POST">
+  <label>Nombre:</label><br />
+  <input type="text" name="nombre" required /><br />
+
+  <label>Descripción:</label><br />
+  <textarea name="descripcion"></textarea><br />
+
+  <label>Duración en semanas:</label><br />
+  <input type="number" name="duracion_semanas" min="1" required /><br />
+
+  <label>Edad mínima:</label>
+  <input type="number" name="edad_minima" min="0" />
+  <label>Edad máxima:</label>
+  <input type="number" name="edad_maxima" min="0" /><br />
+
+  <label>Requisitos:</label><br />
+  <textarea name="requisitos"></textarea><br /><br />
+
+  <button type="submit">Guardar</button>
+</form>
+
+{% endblock %}
