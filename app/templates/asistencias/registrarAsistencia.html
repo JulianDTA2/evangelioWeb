@@ -1,0 +1,21 @@
+{% extends 'base.html' %} {% block content %}
+<h2>Registrar Asistencia</h2>
+<form method="post">
+  <label>Catequizando:</label><br />
+  <select name="catequizando_id">
+    {% for c in catequizandos %}
+    <option value="{{ c.id }}">
+      {{ c.persona.nombres }} {{ c.persona.apellidos }}
+    </option>
+    {% endfor %}</select
+  ><br />
+
+  <label>Fecha:</label><br />
+  <input type="date" name="fecha" /><br />
+
+  <label>¿Asistió?</label>
+  <input type="checkbox" name="estado" /><br /><br />
+
+  <input type="submit" value="Guardar" />
+</form>
+{% endblock %}

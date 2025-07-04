@@ -1,0 +1,30 @@
+{% extends 'base.html' %} {% block content %}
+<h2>Historial de Asistencias</h2>
+<a href="{{ url_for('mainRoutes.registrarAsistencia') }}"
+  >Registrar Asistencia</a
+>
+
+<table border="1">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Catequizando</th>
+      <th>Fecha</th>
+      <th>Asistió</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for a in asistencias %}
+    <tr>
+      <td>{{ a.id }}</td>
+      <td>
+        {{ a.catequizando.persona.nombres }} {{ a.catequizando.persona.apellidos
+        }}
+      </td>
+      <td>{{ a.fecha }}</td>
+      <td>{{ 'Sí' if a.estado else 'No' }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

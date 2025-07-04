@@ -1,0 +1,31 @@
+{% extends 'base.html' %} {% block content %}
+<h2>Registrar Catequizando</h2>
+<form method="post">
+  <label>Persona:</label><br />
+  <select name="persona_Id">
+    {% for p in personas %}
+    <option value="{{ p.id }}">{{ p.nombres }} {{ p.apellidos }}</option>
+    {% endfor %}</select
+  ><br />
+
+  <label>Parroquia:</label><br />
+  <select name="parroquia_Id">
+    {% for par in parroquias %}
+    <option value="{{ par.id }}">{{ par.nombre }}</option>
+    {% endfor %}</select
+  ><br />
+
+  <label>Nivel Actual (opcional):</label><br />
+  <select name="nivel_Actual">
+    <option value="">-- Seleccione --</option>
+    {% for n in niveles %}
+    <option value="{{ n.id }}">{{ n.nombre }}</option>
+    {% endfor %}</select
+  ><br />
+
+  <label>Fecha de Ingreso:</label><br />
+  <input type="date" name="fecha_Ingreso" /><br /><br />
+
+  <input type="submit" value="Guardar" />
+</form>
+{% endblock %}

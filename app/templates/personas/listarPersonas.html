@@ -1,0 +1,45 @@
+<!-- app/templates/personas/listarPersonas.html -->
+
+{% extends 'base.html' %} {% block content %}
+<h2>Listado de Personas</h2>
+<a href="{{ url_for('mainRoutes.crearPersona') }}">Nueva Persona</a>
+<table border="1">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Nombres</th>
+      <th>Apellidos</th>
+      <th>Cédula</th>
+      <th>Acciones</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for persona in personas %}
+    <tr>
+      <td>{{ persona.id }}</td>
+      <td>{{ persona.nombres }}</td>
+      <td>{{ persona.apellidos }}</td>
+      <td>{{ persona.cedula }}</td>
+      <td>
+        <a href="{{ url_for('mainRoutes.editarPersona', id=persona.id) }}"
+          >Editar</a
+        >
+        |
+        <form
+          method="post"
+          action="{{ url_for('mainRoutes.eliminarPersona', id=persona.id) }}"
+          style="display: inline"
+        >
+          <button
+            type="submit"
+            onclick="return confirm('¿Estás seguro de eliminar esta persona?')"
+          >
+            Eliminar
+          </button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

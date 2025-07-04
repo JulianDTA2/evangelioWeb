@@ -1,0 +1,33 @@
+{% extends 'base.html' %} {% block content %}
+<h2>Registrar Nueva Parroquia</h2>
+<form method="post">
+  <label>Nombre:</label><br />
+  <input type="text" name="nombre" /><br />
+
+  <label>Dirección:</label><br />
+  <input type="text" name="direccion" /><br />
+
+  <label>Teléfono:</label><br />
+  <input type="text" name="telefono" /><br />
+
+  <label>¿Es parroquia principal?</label>
+  <input type="checkbox" name="es_Principal" /><br />
+
+  <label>Fecha de Fundación:</label><br />
+  <input type="date" name="fecha_Fundacion" /><br />
+
+  <label>Historia:</label><br />
+  <textarea name="historia"></textarea><br />
+
+  <label>Horarios de Atención:</label><br />
+  <input type="text" name="horarios_Atencion" /><br />
+
+  <label>Sitio Web:</label><br />
+  <input type="text" name="sitio_Web" /><br />
+
+  <label>Email:</label><br />
+  <input type="email" name="email" /><br /><br />
+
+  <input type="submit" value="Guardar" />
+</form>
+{% endblock %}

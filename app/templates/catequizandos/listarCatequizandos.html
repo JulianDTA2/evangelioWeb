@@ -1,0 +1,47 @@
+{% extends 'base.html' %} {% block content %}
+<h2>Listado de Catequizandos</h2>
+<a href="{{ url_for('mainRoutes.crearCatequizando') }}">Nuevo Catequizando</a>
+
+<table border="1">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Persona</th>
+      <th>Parroquia</th>
+      <th>Nivel</th>
+      <th>Ingreso</th>
+      <th>Estado</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for c in catequizandos %}
+    <tr>
+      <td>{{ c.id }}</td>
+      <td>{{ c.persona.nombres }} {{ c.persona.apellidos }}</td>
+      <td>{{ c.parroquia.nombre }}</td>
+      <td>{{ c.nivel.nombre if c.nivel else 'Sin nivel' }}</td>
+      <td>{{ c.fechaIngreso }}</td>
+      <td>{{ c.estado }}</td>
+      <td>
+        <a href="{{ url_for('mainRoutes.editarCatequizando', id=c.id) }}"
+          >Editar</a
+        >
+        |
+        <form
+          method="post"
+          action="{{ url_for('mainRoutes.eliminarCatequizando', id=c.id) }}"
+          style="display: inline"
+        >
+          <button
+            type="submit"
+            onclick="return confirm('¿Eliminar este catequizando?')"
+          >
+            Eliminar
+          </button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

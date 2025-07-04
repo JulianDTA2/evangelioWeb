@@ -1,0 +1,44 @@
+<!-- app/templates/personas/crearPersona.html -->
+{% extends 'base.html' %} {% block content %}
+<h2>Registrar Nueva Persona</h2>
+<form method="post">
+  <label>Nombres:</label><br />
+  <input type="text" name="nombres" /><br />
+
+  <label>Apellidos:</label><br />
+  <input type="text" name="apellidos" /><br />
+
+  <label>Cédula:</label><br />
+  <input type="text" name="cedula" /><br />
+
+  <label>Fecha de nacimiento:</label><br />
+  <input type="date" name="fecha_Nacimiento" /><br />
+
+  <label>Teléfono:</label><br />
+  <input type="text" name="telefono" /><br />
+
+  <label>Email:</label><br />
+  <input type="email" name="email" /><br />
+
+  <label>Dirección:</label><br />
+  <input type="text" name="direccion" /><br />
+
+  <label>Género:</label><br />
+  <select name="genero">
+    <option value="M">Masculino</option>
+    <option value="F">Femenino</option>
+    <option value="O">Otro</option></select
+  ><br />
+
+  <label>Estado Civil:</label><br />
+  <select name="estado_Civil">
+    <option value="Soltero">Soltero</option>
+    <option value="Casado">Casado</option>
+    <option value="Divorciado">Divorciado</option>
+    <option value="Viudo">Viudo</option>
+    <option value="Unión Libre">Unión Libre</option></select
+  ><br /><br />
+
+  <input type="submit" value="Guardar" />
+</form>
+{% endblock %}

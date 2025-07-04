@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Editar Persona</h2>
+<form method="post">
+  <label>Nombres:</label><br>
+  <input type="text" name="nombres" value="{{ persona.nombres }}"><br>
+
+  <label>Apellidos:</label><br>
+  <input type="text" name="apellidos" value="{{ persona.apellidos }}"><br>
+
+  <label>Cédula:</label><br>
+  <input type="text" name="cedula" value="{{ persona.cedula }}"><br>
+
+  <label>Fecha de nacimiento:</label><br>
+  <input type="date" name="fecha_Nacimiento" value="{{ persona.fecha_Nacimiento }}"><br>
+
+  <label>Teléfono:</label><br>
+  <input type="text" name="telefono" value="{{ persona.telefono }}"><br>
+
+  <label>Email:</label><br>
+  <input type="email" name="email" value="{{ persona.email }}"><br>
+
+  <label>Dirección:</label><br>
+  <input type="text" name="direccion" value="{{ persona.direccion }}"><br>
+
+  <label>Género:</label><br>
+  <select name="genero">
+    <option value="M" {% if persona.genero == 'M' %}selected{% endif %}>Masculino</option>
+    <option value="F" {% if persona.genero == 'F' %}selected{% endif %}>Femenino</option>
+    <option value="O" {% if persona.genero == 'O' %}selected{% endif %}>Otro</option>
+  </select><br>
+
+  <label>Estado Civil:</label><br>
+  <select name="estado_Civil">
+    <option value="Soltero" {% if persona.estadoCivil == 'Soltero' %}selected{% endif %}>Soltero</option>
+    <option value="Casado" {% if persona.estadoCivil == 'Casado' %}selected{% endif %}>Casado</option>
+    <option value="Divorciado" {% if persona.estadoCivil == 'Divorciado' %}selected{% endif %}>Divorciado</option>
+    <option value="Viudo" {% if persona.estadoCivil == 'Viudo' %}selected{% endif %}>Viudo</option>
+    <option value="Unión Libre" {% if persona.estadoCivil == 'Unión Libre' %}selected{% endif %}>Unión Libre</option>
+  </select><br><br>
+
+  <input type="submit" value="Actualizar">
+</form>
+{% endblock %}

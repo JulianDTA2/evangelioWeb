@@ -1,0 +1,35 @@
+{% extends 'base.html' %} {% block content %}
+<h2>Reportes Generales</h2>
+
+<ul>
+  <li><strong>Total de Catequizandos:</strong> {{ total_Catequizandos }}</li>
+  <li>
+    <strong>Promedio de Evaluaciones:</strong> {{ promedio_Evaluaciones }}
+  </li>
+  <li>
+    <strong>Total de Certificados Emitidos:</strong> {{ certificados_Emitidos }}
+  </li>
+  <li>
+    <strong>Porcentaje de Asistencia Global:</strong> {{
+    porcentaje_Asistencia}}%
+  </li>
+</ul>
+
+<h3>Catequizandos por Nivel</h3>
+<table border="1">
+  <thead>
+    <tr>
+      <th>Nivel</th>
+      <th>Total</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for nivel, total in catequizandosPorNivel %}
+    <tr>
+      <td>{{ nivel }}</td>
+      <td>{{ total }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

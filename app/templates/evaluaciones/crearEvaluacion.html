@@ -1,0 +1,31 @@
+{% extends 'base.html' %} {% block content %}
+<h2>Registrar Evaluación</h2>
+<form method="post">
+  <label>Catequizando:</label><br />
+  <select name="catequizando_id">
+    {% for c in catequizandos %}
+    <option value="{{ catequizando.id }}">
+      {{ c.persona.nombres }} {{ c.persona.apellidos }}
+    </option>
+    {% endfor %}</select
+  ><br />
+
+  <label>Nivel:</label><br />
+  <select name="nivel_id">
+    {% for n in niveles %}
+    <option value="{{ n.id }}">{{ n.nombre }}</option>
+    {% endfor %}</select
+  ><br />
+
+  <label>Fecha:</label><br />
+  <input type="date" name="fecha" /><br />
+
+  <label>Puntaje (0-100):</label><br />
+  <input type="number" name="nota" min="0" max="100" /><br />
+
+  <label>Observaciones:</label><br />
+  <textarea name="observaciones"></textarea><br /><br />
+
+  <input type="submit" value="Guardar" />
+</form>
+{% endblock %}

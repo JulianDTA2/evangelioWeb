@@ -1,0 +1,32 @@
+{% extends 'base.html' %} {% block content %}
+<h2>Listado de Evaluaciones</h2>
+<a href="{{ url_for('mainRoutes.crearEvaluacion') }}">Nueva Evaluación</a>
+
+<table border="1">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Catequizando</th>
+      <th>Nivel</th>
+      <th>Fecha</th>
+      <th>Puntaje</th>
+      <th>Observaciones</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for ev in evaluaciones %}
+    <tr>
+      <td>{{ ev.id }}</td>
+      <td>
+        {{ ev.catequizando.persona.nombres }} {{
+        ev.catequizando.persona.apellidos }}
+      </td>
+      <td>{{ ev.nivel.nombre }}</td>
+      <td>{{ ev.fecha }}</td>
+      <td>{{ ev.nota}}</td>
+      <td>{{ ev.observaciones }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

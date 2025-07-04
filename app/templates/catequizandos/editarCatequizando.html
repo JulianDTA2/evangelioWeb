@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Editar Catequizando</h2>
+<form method="post">
+  <label>Persona:</label><br>
+  <select name="persona_Id">
+    {% for p in personas %}
+    <option value="{{ p.id }}" {% if p.id == catequizando.persona_Id %}selected{% endif %}>{{ p.nombres }} {{ p.apellidos }}</option>
+    {% endfor %}
+  </select><br>
+
+  <label>Parroquia:</label><br>
+  <select name="parroquia_Id">
+    {% for par in parroquias %}
+    <option value="{{ par.id }}" {% if par.id == catequizando.parroquia_Id %}selected{% endif %}>{{ par.nombre }}</option>
+    {% endfor %}
+  </select><br>
+
+  <label>Nivel:</label><br>
+  <select name="nivel_Actual">
+    <option value="">-- Sin Nivel --</option>
+    {% for n in niveles %}
+    <option value="{{ n.id }}" {% if catequizando.nivel_Actual == n.id %}selected{% endif %}>{{ n.nombre }}</option>
+    {% endfor %}
+  </select><br>
+
+  <label>Fecha Ingreso:</label><br>
+  <input type="date" name="fecha_Ingreso" value="{{ catequizando.fecha_Ingreso }}"><br>
+
+  <label>Fecha Salida:</label><br>
+  <input type="date" name="fecha_Salida" value="{{ catequizando.fecha_Salida }}"><br>
+
+  <label>Motivo Salida:</label><br>
+  <input type="text" name="motivo_Salida" value="{{ catequizando.motivo_Salida }}"><br>
+
+  <label>Estado:</label><br>
+  <select name="estado">
+    <option value="Activo" {% if catequizando.estado == 'Activo' %}selected{% endif %}>Activo</option>
+    <option value="Inactivo" {% if catequizando.estado == 'Inactivo' %}selected{% endif %}>Inactivo</option>
+  </select><br><br>
+
+  <input type="submit" value="Actualizar">
+</form>
+{% endblock %}

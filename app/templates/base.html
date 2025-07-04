@@ -1,0 +1,36 @@
+<!-- app/templates/base.html -->
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Evangelio Web</title>
+  </head>
+  <body>
+    <header>
+      <h1>Evangelio Web</h1>
+      <nav>
+        <a href="{{ url_for('mainRoutes.home') }}">Inicio</a> |
+        <a href="{{ url_for('mainRoutes.listarPersonas') }}">Personas</a> |
+        <a href="{{ url_for('mainRoutes.listarCatequizandos') }}"
+          >Catequizandos</a
+        >
+        |
+        <a href="{{ url_for('mainRoutes.listarParroquias') }}">Parroquias</a> |
+        <a href="{{ url_for('mainRoutes.listarEvaluaciones') }}"
+          >Evaluaciones</a
+        >
+        |
+        <a href="{{ url_for('mainRoutes.listarAsistencias') }}">Asistencias</a>
+        |
+        <a href="{{ url_for('mainRoutes.listarCertificados') }}"
+          >Certificados</a
+        >
+        |
+        <a href="{{ url_for('mainRoutes.reportesGenerales') }}">Reportes</a> |
+      </nav>
+      <hr />
+    </header>
+
+    <main>{% block content %}{% endblock %}</main>
+  </body>
+</html>
